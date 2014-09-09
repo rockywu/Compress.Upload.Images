@@ -134,7 +134,9 @@
                 formData.append('file', file);
                 xhr.send(formData);
             } else {
-                boundary = boundary || this.defBoundary;
+                console.log(boundary);
+                boundary = boundary || this.params.defBoundary;
+                console.log(boundary);
                 if (XMLHttpRequest.prototype.sendAsBinary === undefined) {
                     XMLHttpRequest.prototype.sendAsBinary = function(string) {
                         var bytes = Array.prototype.map.call(string, function(c) {
@@ -156,7 +158,6 @@
                 img = document.createElement('img');
             reader.readAsDataURL(file);
             reader.onload = function(e) {
-                console.log(e, this.result);
                 img.src = this.result;
             }
             img.onload = function() {
@@ -187,7 +188,7 @@
                         } else {
                             data = tmpCtx.getImageData(0, 0, width, height);
                         }
-                        self.doUpload(file, "kfstouch-someboundary", data);
+                        self.doUpload(file, data, "kfstouch-someboundary");
                     }
                 });
             }

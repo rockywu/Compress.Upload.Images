@@ -30,6 +30,7 @@
             file : document.querySelector("#image-files"),
             onSuccess: function(f, response) {
                 var json = eval("("+response+")");
+                console.log(json);
                 img = document.createElement('img');
                 img.src = "http://pic1.ajkimg.com/m/"+json.image.hash+"/200x150.jpg";
                 imglist.appendChild(img); 

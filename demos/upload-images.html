@@ -1,0 +1,47 @@
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script type="text/javascript" src="../src/ios.js"></script>
+        <script type="text/javascript" src="../src/android.js"></script>
+        <script type="text/javascript" src="../src/binaryajax.js"></script>
+        <script type="text/javascript" src="../src/exif.js"></script>
+        <script type="text/javascript" src="../src/compress.upload.images.js"></script>
+    </head>
+    <body>
+        <form action="http://upd1.ajkimg.com/upload" enctype="multipart/form-data" method="post">
+            <input type="file" multiple="true" name="file" id="image-files" />
+            <input type="button" value="上传看看" id="do-upload" />
+            <input type="submit" value="提交" />
+        </form>
+        <div id="imgList">
+
+        </div>
+    </body>
+</html>
+<script>
+    window.onload = function() {
+        var obj = document.querySelector("#do-upload");
+        var imglist = document.querySelector("#imglist");
+        var up = new CUI({
+            onSelect : function(){},
+            maxHeight: 400,
+            maxWidth: 400,
+            uploadUrl : 'http://upd1.ajkimg.com/upload',
+            file : document.querySelector("#image-files"),
+            onSuccess: function(f, response) {
+                var json = eval("("+response+")");
+                img = document.createElement('img');
+                img.src = "http://pic1.ajkimg.com/m/"+json.image.hash+"/200x150.jpg";
+                imglist.appendChild(img); 
+            },
+            onProgress : function(file, loaded, total) {
+                console.log(file.name+"=>"+parseInt((loaded/total)*100));
+            }
+        });
+        obj.addEventListener('click', function() {
+            up.upload();
+        }); 
+        up.upload();
+        console.log(up);
+    }
+</script>

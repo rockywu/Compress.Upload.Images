@@ -56,7 +56,7 @@
             maxWidth : 0,       //图片压缩最大宽度像素默认为0，不压缩
             maxHeight : 0,      //图片压缩最大高度像素默认为0，不压缩
             inputName : 'file', //设置默认提交的input name 为file
-            imageQuality : 50,  //默认图片压缩质量为50%
+            imageQuality : 100,  //默认图片压缩质量为100%
         };
         this.params = Tools.extend(this.defParams, params);   //统一参数
         this.params.maxWidth = parseInt(this.params.maxWidth);
@@ -106,6 +106,7 @@
                 } else {
                     this.doUpload(files[k]);
                 }
+                this.onSelect(files[k]);
             }
         },
         checkFile : function(file) {
@@ -179,7 +180,7 @@
                     };
                 }
                 var myEncoder = new JPEGEncoder(this.params.imageQuality),
-                    JPEGImage = myEncoder.encode(data,100);
+                    JPEGImage = myEncoder.encode(data, this.params.imageQuality);
                     data = JPEGImage.substr(23);    //删除base64头
                 xhr.setRequestHeader('Content-Type', 'multipart/form-data; boundary=' + boundary);
                 xhr.sendAsBinary(['--' + boundary, 'Content-Disposition: form-data; name="' + this.params.inputName + '"; filename="' + file.name + '"', 'Content-Type: ' + file.type, '', atob(data), '--' + boundary + '--'].join('\r\n'));

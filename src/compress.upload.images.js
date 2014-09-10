@@ -46,7 +46,9 @@
             'onProgress',   //文件上传进度
             'onSuccess',    //文件上传成功时
             'onFailure',    //文件上传失败时,
-            'onComplete'    //文件全部上传完毕时
+            'onComplete',   //文件全部上传完毕时
+            'onMessage',    //文件上传时出现报错提示
+            'onCheckFile',  //自定义验证是否多次上传
         ];
         this.defParams = {
             file : null,        //input file dom对象
@@ -56,10 +58,13 @@
             inputName : 'file', //设置默认提交的input name 为file
         };
         this.params = Tools.extend(this.defParams, params);   //统一参数
-        this.fileFilter = [];   //文件过滤器
-        this.fileLists = [];    //文件数组
+        this.params.maxWidth = parseInt(this.params.maxWidth);
+        this.params.maxHeight = parseInt(this.params.maxHeight);
+        this.filesFilter = [];   //文件过滤器
+        this.filesName = [];    //文件名保存器
         this.defBoundary = "--image-someboundary--";
         this.init();            //初始化回调方法
+        this.xhr = new XMLHttpRequest();    //初始化xhr对象
     }
     CUI.prototype = {
         constructor : CUI,
@@ -74,23 +79,26 @@
                 }
             }
         },
-        msg : function(msg) {
+        onMessage : function(msg) {
             console.log(msg);
         },
         upload : function() {
             var files, k;
             if(typeof this.params.file !== 'object' ||  this.params.file === null) {
-                this.msg('请输入input file对象');
+                this.onMessage('请输入input file对象');
                 return false;
             }
             files = this.params.file.files;
             if(files.length < 1 ) {
-                this.msg('请选择上传的文件');
+                this.onMessage('请选择上传的文件');
                 return false;
             }
             for(k = 0; k < files.length; k++) {
+                if(this.checkFile(files[k])) {
+                    continue;
+                }
                 if(files[k].type  === "image/jpeg") {
-                    if(parseInt(this.params.maxWidth) > 0 && parseInt(this.params.maxHeight) > 0) {
+                    if(this.params.maxWidth > 0 && this.params.maxHeight > 0) {
                         this.compressUpload(files[k]);
                     } else {
                         this.doUpload(files[k]);
@@ -100,12 +108,37 @@
                 }
             }
         },
+        checkFile : function(file) {
+            var k, tmp, bool = false;
+            for(k=0; k <= this.filesName.length; k++) {
+                if(this.filesName[k] === file.name) {
+                    bool = true;
+                }
+            }
+            if(this.onCheckFile(file) && bool) {
+                return true;
+            } else {
+                this.filesName.push(file.name);
+                this.filesFilter.push(file.name);
+                return false;
+            }
+        },
+        deleteFile : function(file) {
+            var k, tmp = this.filesFilter;
+            for(k=0; k <= tmp.length; k++) {
+                if(tmp[k] === file.name) {
+                    this.filesFilter.splice(k, 1);
+                    return true;
+                }
+            }
+        },
         doUpload :function(file, data, boundary) {
             var self = this,
                 formData,
-                xhr = new XMLHttpRequest();    //初始化xhr对象
+                //xhr = new XMLHttpRequest();    //初始化xhr对象
+                xhr = this.xhr;
             if(!xhr.upload) {
-                this.msg('浏览器无法使用xhr.upload对象');
+                this.onMessage('浏览器无法使用xhr.upload对象');
                 return false;
             }
             // 文件上传中
@@ -117,11 +150,11 @@
                 if (xhr.readyState == 4) {
                     if (xhr.status == 200) {
                         self.onSuccess(file, xhr.responseText);
-                        //self.funDeleteFile(file);
-                        //if (!self.fileFilter.length) {
-                        //    //全部完毕
-                        //    self.onComplete();
-                        //}
+                        self.deleteFile(file);
+                        if (!self.filesFilter.length) {
+                            //全部完毕
+                            self.onComplete();
+                        }
                     } else {
                         self.onFailure(file, xhr.responseText);
                     }
@@ -134,9 +167,7 @@
                 formData.append('file', file);
                 xhr.send(formData);
             } else {
-                console.log(boundary);
                 boundary = boundary || this.params.defBoundary;
-                console.log(boundary);
                 if (XMLHttpRequest.prototype.sendAsBinary === undefined) {
                     XMLHttpRequest.prototype.sendAsBinary = function(string) {
                         var bytes = Array.prototype.map.call(string, function(c) {
@@ -167,13 +198,17 @@
                     mpImg = new MegaPixImage(file),
                     orientation = 1, //照片方向值
                     tmpImg = document.createElement('img');
-                if(img.width < self.maxWidth && img.height < self.maxHeight) {
+                if(img.width < self.params.maxWidth && img.height < self.params.maxHeight) {
                     width = img.width;
                     height = img.height;
                 } else {
-                    //逻辑还未完成
-                    width = img.width;
-                    height = img.height;
+                    if(img.width / self.params.maxWidth > img.height / self.params.maxHeight ) {
+                        width = self.params.maxWidth;
+                        height = parseInt(img.height * self.params.maxWidth / img.width);
+                    } else {
+                        width = parseInt(img.width * self.params.maxHeight / img.height);
+                        height = self.params.maxHeight;
+                    }
                 }
                 mpImg.render(tmpImg, {maxWidth: width, maxHeight: height });
                 EXIF.getData(file, function() {

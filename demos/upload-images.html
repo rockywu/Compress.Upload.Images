@@ -24,8 +24,8 @@
         var imglist = document.querySelector("#imglist");
         var up = new CUI({
             onSelect : function(){},
-            maxHeight: 400,
-            maxWidth: 400,
+            maxWidth: 600,
+            maxHeight: 600,
             uploadUrl : 'http://upd1.ajkimg.com/upload',
             file : document.querySelector("#image-files"),
             onSuccess: function(f, response) {
@@ -37,12 +37,16 @@
             },
             onProgress : function(file, loaded, total) {
                 console.log(file.name+"=>"+parseInt((loaded/total)*100));
+            },
+            onMessage : function(msg) {
+                console.log("rockywu"+ msg);
+            },
+            onComplete : function() {
+                console.log("已经全部上传");
             }
         });
         obj.addEventListener('click', function() {
             up.upload();
         }); 
-        up.upload();
-        console.log(up);
     }
 </script>

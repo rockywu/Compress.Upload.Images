@@ -64,7 +64,6 @@
         this.filesName = [];    //文件名保存器
         this.defBoundary = "--image-someboundary--";
         this.init();            //初始化回调方法
-        this.xhr = new XMLHttpRequest();    //初始化xhr对象
     }
     CUI.prototype = {
         constructor : CUI,
@@ -135,8 +134,7 @@
         doUpload :function(file, data, boundary) {
             var self = this,
                 formData,
-                //xhr = new XMLHttpRequest();    //初始化xhr对象
-                xhr = this.xhr;
+                xhr = new XMLHttpRequest();    //初始化xhr对象
             if(!xhr.upload) {
                 this.onMessage('浏览器无法使用xhr.upload对象');
                 return false;

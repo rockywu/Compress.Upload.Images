@@ -56,6 +56,7 @@
             maxWidth : 0,       //图片压缩最大宽度像素默认为0，不压缩
             maxHeight : 0,      //图片压缩最大高度像素默认为0，不压缩
             inputName : 'file', //设置默认提交的input name 为file
+            imageQuality : 50,  //默认图片压缩质量为50%
         };
         this.params = Tools.extend(this.defParams, params);   //统一参数
         this.params.maxWidth = parseInt(this.params.maxWidth);
@@ -131,6 +132,9 @@
                 }
             }
         },
+        onCheckFile :function(file) {
+            return true;
+        },
         doUpload :function(file, data, boundary) {
             var self = this,
                 formData,
@@ -171,10 +175,10 @@
                         var bytes = Array.prototype.map.call(string, function(c) {
                             return c.charCodeAt(0) & 0xff;
                         });
-                        this.send(new Uint8Array(bytes).buffer);
+                        this.send(new Uint8Array(bytes));
                     };
                 }
-                var myEncoder = new JPEGEncoder(),
+                var myEncoder = new JPEGEncoder(this.params.imageQuality),
                     JPEGImage = myEncoder.encode(data,100);
                     data = JPEGImage.substr(23);    //删除base64头
                 xhr.setRequestHeader('Content-Type', 'multipart/form-data; boundary=' + boundary);

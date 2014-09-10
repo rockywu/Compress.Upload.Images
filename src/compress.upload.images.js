@@ -1,5 +1,5 @@
 /**
- * 多图压缩上传功能，兼容ios&android
+ * 多图压缩上传功能，兼容ios&android,同是可以用作多文件上传
  * compress.upload.images
  * @package src/
  * @author rockywu wjl19890427@hotmail.com

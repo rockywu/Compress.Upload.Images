@@ -15,12 +15,15 @@
     <body>
         <form action="http://upd1.ajkimg.com/upload" enctype="multipart/form-data" method="post">
             <input type="file" multiple="true" name="file" id="image-files" />
+            <input type="file" name="file" id="image-one"/>
+            <input type="color" name="file" value="颜色选择器"/>
             <input type="button" value="上传看看" id="do-upload" />
-            <input type="submit" value="提交" />
         </form>
         <div id="imgList">
 
         </div>
+        <input type="datetime-local" value="输入"/>
+        <input type="date" value="上传看看" />
     </body>
 </html>
 <script>
@@ -31,20 +34,22 @@
             onSelect : function(){},
             maxWidth: 300,
             maxHeight: 300,
-            imageQuality : 100,
+            imageQuality : 50,
             //uploadUrl : 'http://upd1.ajkimg.com/upload',
             uploadUrl : 'http://upd1.dfs.pg.anjuke.test/upload',
             file : document.querySelector("#image-files"),
-            onSuccess: function(f, response) {
+            onSuccess: function(file, response) {
+                console.log(file.name+'success1'+ this.getTime());
                 var json = eval("("+response+")");
                 console.log(json);
                 img = document.createElement('img');
                 //img.src = "http://pic1.ajkimg.com/m/"+json.image.hash+"/200x150.jpg";
                 img.src = "http://pic1.dfs.pg.anjuke.test/m/"+json.image.hash+"/200x150.jpg";
                 imglist.appendChild(img); 
+                console.log(file.name+'success2'+this.getTime());
             },
             onProgress : function(file, loaded, total) {
-                console.log(file.name+"=>"+parseInt((loaded/total)*100));
+                //console.log(file.name+"=>"+parseInt((loaded/total)*100));
             },
             onMessage : function(msg) {
                 console.log("rockywu"+ msg);

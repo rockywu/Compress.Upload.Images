@@ -11,19 +11,34 @@
         <script type="text/javascript" src="../src/binaryajax.js"></script>
         <script type="text/javascript" src="../src/exif.js"></script>
         <script type="text/javascript" src="../src/compress.upload.images.js"></script>
+        <style>
+            .t-input{
+                display: block;
+                width: 100px;
+                height: 40px;
+                line-height: 40px;
+                background-color:#038800;
+                color:#fff;
+                -webkit-appearance: none;
+                outline:0;
+                -webkit-user-select: none;
+                white-space: pre;
+                border: 1px solid #ccc;
+            }
+            .t-input:active,t-input:visited{
+                background-color:#FFD1B9;
+            }
+        </style>
     </head>
     <body>
         <form action="http://upd1.ajkimg.com/upload" enctype="multipart/form-data" method="post">
-            <input type="file" multiple="true" name="file" id="image-files" />
-            <input type="file" name="file" id="image-one"/>
-            <input type="color" name="file" value="颜色选择器"/>
-            <input type="button" value="上传看看" id="do-upload" />
+            <input type="file" multiple="true" name="file" id="image-files"/>
+            <input type="button" value="上传看看" id="do-upload" class="t-input"/>
         </form>
         <div id="imgList">
 
         </div>
-        <input type="datetime-local" value="输入"/>
-        <input type="date" value="上传看看" />
+        <input type="color" />
     </body>
 </html>
 <script>
@@ -39,19 +54,17 @@
             uploadUrl : 'http://upd1.dfs.pg.anjuke.test/upload',
             file : document.querySelector("#image-files"),
             onSuccess: function(file, response) {
-                console.log(file.name+'success1'+ this.getTime());
                 var json = eval("("+response+")");
                 console.log(json);
                 img = document.createElement('img');
                 //img.src = "http://pic1.ajkimg.com/m/"+json.image.hash+"/200x150.jpg";
                 img.src = "http://pic1.dfs.pg.anjuke.test/m/"+json.image.hash+"/200x150.jpg";
                 imglist.appendChild(img); 
-                console.log(file.name+'success2'+this.getTime());
             },
             onProgress : function(file, loaded, total) {
-                //console.log(file.name+"=>"+parseInt((loaded/total)*100));
+                console.log(file.name+"=>"+parseInt((loaded/total)*100));
             },
-            onMessage : function(msg) {
+            onMessage : function(id, msg) {
                 console.log("rockywu"+ msg);
             },
             onComplete : function() {
@@ -59,7 +72,7 @@
             }
         });
         obj.addEventListener('click', function() {
-            up.upload();
+            up.doUpload();
         }); 
     }
 </script>

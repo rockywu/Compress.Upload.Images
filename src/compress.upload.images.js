@@ -17,8 +17,8 @@
                 }
                 return a;
             },
-            rotate : function (canvasTarget, image, w, h,orientation){
-                if(orientation==6 || orientation==8){
+            rotate : function (canvasTarget, image, w, h, orientation){
+                if(orientation == 6 || orientation == 8){
                     canvasTarget.width = h;
                     canvasTarget.height = w;
                 }else{
@@ -26,13 +26,13 @@
                     canvasTarget.height = h;
                 }
                 var ctxtarget = canvasTarget.getContext("2d");
-                if(orientation==6){
+                if(orientation == 6){
                     ctxtarget.translate(h, 0);
                     ctxtarget.rotate(Math.PI / 2);
-                }else if(orientation==8){
+                }else if(orientation == 8){
                     ctxtarget.translate(0,w);
                     ctxtarget.rotate(270*Math.PI/180 );
-                }else if(orientation==3){
+                }else if(orientation == 3){
                     ctxtarget.translate(w,h);
                     ctxtarget.rotate(Math.PI );
                 }
@@ -56,11 +56,18 @@
             maxWidth : 0,       //图片压缩最大宽度像素默认为0，不压缩
             maxHeight : 0,      //图片压缩最大高度像素默认为0，不压缩
             inputName : 'file', //设置默认提交的input name 为file
-            imageQuality : 100,  //默认图片压缩质量为100%
+            imageQuality : 100, //默认图片压缩质量为100%
+            httpBoundary : '--my-file-boundary--', //默认文件上传的分隔线
+            async : true,       //是否异步传输 默认为true
         };
-        this.params = Tools.extend(this.defParams, params);   //统一参数
-        this.params.maxWidth = parseInt(this.params.maxWidth);
-        this.params.maxHeight = parseInt(this.params.maxHeight);
+        this.msg = {
+            101 : '无法获取file控件',
+            102 : '无法获取file文件内容'
+        };
+        this.index = 0;
+        this.p = Tools.extend(this.defParams, params);   //统一参数
+        this.p.maxWidth = parseInt(this.p.maxWidth);
+        this.p.maxHeight = parseInt(this.p.maxHeight);
         this.filesFilter = [];   //文件过滤器
         this.filesName = [];    //文件名保存器
         this.defBoundary = "--image-someboundary--";
@@ -72,48 +79,67 @@
             var k,fun;
             for(k in this.callbackFuns) {
                 fun = this.callbackFuns[k];
-                if(typeof this.params[fun] === 'function') {
-                    this.constructor.prototype[fun] = this.params[fun];
+                if(typeof this.p[fun] === 'function') {
+                    this.constructor.prototype[fun] = this.p[fun];
                 } else {
                     this.constructor.prototype[fun] = function() {};
                 }
             }
         },
-        getTime : function() {
-            var time = new Date();
-            return time.getFullYear() + "-" + time.getMonth() + "-" + time.getDate() + " " + time.getHours() + ":" + time.getMinutes() + ":" + time.getSeconds() + "." + time.getMilliseconds();
+        /**
+         *  消息提示
+         */
+        onMessage : function(id, msg) {
+            console.log(id + "---" + msg);
         },
-        onMessage : function(msg) {
-            console.log(msg);
-        },
-        upload : function() {
+        /**
+         *  运行上传功能
+         */
+        doUpload : function() {
             var files, k;
-            if(typeof this.params.file !== 'object' ||  this.params.file === null) {
-                this.onMessage('请输入input file对象');
+            if(typeof this.p.file !== 'object' || this.p.file === null) {
+                this.onMessage(101, this.msg['101']);
                 return false;
             }
-            files = this.params.file.files;
-            if(files.length < 1 ) {
-                this.onMessage('请选择上传的文件');
+            files = this.p.file.files;
+            if(files.length < 1) {
+                this.onMessage('102', this.msg['102']);
                 return false;
             }
             for(k = 0; k < files.length; k++) {
-                if(this.checkFile(files[k])) {
+                //文件过滤
+                if(this.isRepeat(files[k])) {
                     continue;
                 }
                 if(files[k].type  === "image/jpeg") {
-                    if(this.params.maxWidth > 0 && this.params.maxHeight > 0) {
-                        this.compressUpload(files[k]);
+                    if(this.p.maxWidth > 0 && this.p.maxHeight > 0) {
+                        this.compressImage(index, files[k]);
                     } else {
-                        this.doUpload(files[k]);
+                        this.uploading(index, files[k]);
                     }
                 } else {
-                    this.doUpload(files[k]);
+                    this.uploading(index, files[k]);
                 }
-                this.onSelect(files[k]);
+                this.onSelect(index, file[k]);
             }
+
         },
-        checkFile : function(file) {
+        /**
+         *  图片类型压缩
+         */
+        compressImage : function() {
+
+        },
+        /**
+         *  开始文件上传
+         */
+        uploading : function(index, file) {
+
+        },
+        /**
+         *  图片是否重复上传
+         */
+        isRepeat : function(file) {
             var k, tmp, bool = false;
             for(k=0; k <= this.filesName.length; k++) {
                 if(this.filesName[k] === file.name) {
@@ -140,7 +166,7 @@
         onCheckFile :function(file) {
             return true;
         },
-        doUpload :function(file, data, boundary) {
+        _doUpload :function(file, data, boundary) {
             var self = this,
                 formData,
                 xhr = new XMLHttpRequest();    //初始化xhr对象
@@ -180,7 +206,7 @@
                         var bytes = Array.prototype.map.call(string, function(c) {
                             return c.charCodeAt(0) & 0xff;
                         });
-                        this.send(new Uint8Array(bytes));
+                        this.send(new Uint8Array(bytes).buffer);
                     };
                 }
                 var myEncoder = new JPEGEncoder(this.params.imageQuality),
@@ -190,7 +216,7 @@
                 xhr.sendAsBinary(['--' + boundary, 'Content-Disposition: form-data; name="' + this.params.inputName + '"; filename="' + file.name + '"', 'Content-Type: ' + file.type, '', atob(data), '--' + boundary + '--'].join('\r\n'));
             }
         },
-        compressUpload : function(file) {
+        _compressUpload : function(file) {
             var self = this,
                 reader = new FileReader(),
                 img = document.createElement('img');

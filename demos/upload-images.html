@@ -53,7 +53,7 @@
             //uploadUrl : 'http://upd1.ajkimg.com/upload',
             uploadUrl : 'http://upd1.dfs.pg.anjuke.test/upload',
             file : document.querySelector("#image-files"),
-            onSuccess: function(file, response) {
+            onSuccess: function(index, file, response) {
                 var json = eval("("+response+")");
                 console.log(json);
                 img = document.createElement('img');
@@ -61,10 +61,10 @@
                 img.src = "http://pic1.dfs.pg.anjuke.test/m/"+json.image.hash+"/200x150.jpg";
                 imglist.appendChild(img); 
             },
-            onProgress : function(file, loaded, total) {
+            onProgress : function(index, file, loaded, total) {
                 console.log(file.name+"=>"+parseInt((loaded/total)*100));
             },
-            onMessage : function(id, msg) {
+            onMessage : function(index, id, msg) {
                 console.log("rockywu"+ msg);
             },
             onComplete : function() {

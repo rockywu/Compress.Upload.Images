@@ -17,26 +17,27 @@
                 }
                 return a;
             },
-            rotate : function (canvasTarget, image, w, h, orientation){
+            rotate : function (cvt, image, w, h, orientation){
+                var cvtg;
                 if(orientation == 6 || orientation == 8){
-                    canvasTarget.width = h;
-                    canvasTarget.height = w;
+                    cvt.width = h;
+                    cvt.height = w;
                 }else{
-                    canvasTarget.width = w;
-                    canvasTarget.height = h;
+                    cvt.width = w;
+                    cvt.height = h;
                 }
-                var ctxtarget = canvasTarget.getContext("2d");
+                var cvtg = cvt.getContext("2d");
                 if(orientation == 6){
-                    ctxtarget.translate(h, 0);
-                    ctxtarget.rotate(Math.PI / 2);
+                    cvtg.translate(h, 0);
+                    cvtg.rotate(Math.PI / 2);
                 }else if(orientation == 8){
-                    ctxtarget.translate(0,w);
-                    ctxtarget.rotate(270*Math.PI/180 );
+                    cvtg.translate(0,w);
+                    cvtg.rotate(270*Math.PI/180 );
                 }else if(orientation == 3){
-                    ctxtarget.translate(w,h);
-                    ctxtarget.rotate(Math.PI );
+                    cvtg.translate(w,h);
+                    cvtg.rotate(Math.PI );
                 }
-                ctxtarget.drawImage(image, 0, 0);
+                cvtg.drawImage(image, 0, 0);
             }
         };
     CUI = function(params) {

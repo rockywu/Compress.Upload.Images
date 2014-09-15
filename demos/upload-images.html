@@ -54,6 +54,7 @@
             uploadUrl : 'http://upd1.dfs.pg.anjuke.test/upload',
             file : document.querySelector("#image-files"),
             onSuccess: function(index, file, response) {
+                console.log(index);
                 var json = eval("("+response+")");
                 console.log(json);
                 img = document.createElement('img');
@@ -62,13 +63,18 @@
                 imglist.appendChild(img); 
             },
             onProgress : function(index, file, loaded, total) {
+                console.log(index);
                 console.log(file.name+"=>"+parseInt((loaded/total)*100));
             },
-            onMessage : function(index, id, msg) {
+            onMessage : function(id, msg) {
                 console.log("rockywu"+ msg);
             },
             onComplete : function() {
                 console.log("已经全部上传");
+            },
+            onSelect : function(index, file) {
+                console.log(index);
+
             }
         });
         obj.addEventListener('click', function() {
